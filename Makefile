@@ -21,19 +21,20 @@ Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
 
 .PHONY: all
-all: fmt lint vendor | ; $(info $(M) building executable…) @ ## Build program binary
+all: fmt vendor | ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X $(PACKAGE)/internal/pkg/version.Version=$(VERSION) -X $(PACKAGE)/internal/pkg/version.BuildDate=$(DATE) -X $(PACKAGE)/internal/pkg/version.Package=$(PACKAGE) -X $(PACKAGE)/internal/pkg/version.Commit=$(COMMIT) -X $(PACKAGE)/internal/pkg/version.Branch=$(BRANCH)' \
+                -installsuffix "static" \
 		-o bin/$(BINARY) $(PACKAGE)/cmd \
     && echo "Built bin/$(BINARY): $(VERSION) $(DATE)"
 
 # Tools
 #
 
-GOLINT = $(BIN)/golint
-$(BIN)/golint: | ; $(info $(M) building golint…)
-	$Q go get golang.org/x/lint/golint
+#GOLINT = $(BIN)/golint
+#$(BIN)/golint: | ; $(info $(M) building golint…)
+#	$Q go get golang.org/x/lint/golint
 
 GOCOVMERGE = $(BIN)/gocovmerge
 $(BIN)/gocovmerge: | ; $(info $(M) building gocovmerge…)
@@ -96,9 +97,9 @@ docker: | ; $(info $(M) building docker container…)
 	docker build -t $(DOCKER_IMAGE_BASE):$(DOCKER_TAG) .
 	docker build -t $(DOCKER_IMAGE_BASE):latest .
 
-.PHONY: lint
-lint: vendor | $(GOLINT) ; $(info $(M) running golint…)
-	$Q $(GOLINT) $(PKGS)
+#.PHONY: lint
+#lint: vendor | $(GOLINT) ; $(info $(M) running golint…)
+#	$Q $(GOLINT) $(PKGS)
 
 .PHONY: fmt
 fmt: ; $(info $(M) running gofmt…) @
